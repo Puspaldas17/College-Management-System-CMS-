@@ -146,6 +146,25 @@ const getTimetable = async (req, res) => {
     }
 };
 
+// @desc    Get Dashboard Stats
+// @route   GET /api/admin/stats
+// @access  Private/Admin
+const getDashboardStats = async (req, res) => {
+    try {
+        const studentCount = await User.countDocuments({ role: 'student' });
+        const teacherCount = await User.countDocuments({ role: 'teacher' });
+        const departmentCount = await Department.countDocuments({});
+
+        res.json({
+            students: studentCount,
+            teachers: teacherCount,
+            departments: departmentCount
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     addUser,
     getUsers,
@@ -154,5 +173,6 @@ module.exports = {
     createSubject,
     getSubjects,
     createTimetableEntry,
-    getTimetable
+    getTimetable,
+    getDashboardStats
 };
