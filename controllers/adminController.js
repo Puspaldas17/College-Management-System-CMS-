@@ -165,6 +165,88 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+// @desc    Get Attendance Analytics
+// @route   GET /api/admin/attendance-analytics
+// @access  Private/Admin
+const getAttendanceAnalytics = async (req, res) => {
+    try {
+        // 1. Daily Stats (Present count for today)
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const todayAttendance = await require('../models/Attendance').find({
+            date: { $gte: startOfDay, $lte: endOfDay }
+        });
+
+        const totalToday = todayAttendance.length;
+        const presentToday = todayAttendance.filter(a => a.status === 'Present').length;
+        const absentToday = todayAttendance.filter(a => a.status === 'Absent').length;
+
+        // 2. Low Attendance Students (< 75%)
+        // We need to aggregate all records
+        const lowAttendanceList = await require('../models/Attendance').aggregate([
+            {
+                $group: {
+                    _id: '$student',
+                    totalClasses: { $sum: 1 },
+                    totalPresent: { 
+                        $sum: { 
+                            $cond: [{ $in: ['$status', ['Present', 'Late']] }, 1, 0] 
+                        } 
+                    }
+                }
+            },
+            {
+                $project: {
+                    attendancePercentage: { 
+                        $multiply: [{ $divide: ['$totalPresent', '$totalClasses'] }, 100] 
+                    }
+                }
+            },
+            {
+                $match: {
+                    attendancePercentage: { $lt: 75 }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'studentInfo'
+                }
+            },
+            {
+                $unwind: '$studentInfo'
+            },
+            {
+                $project: {
+                    name: '$studentInfo.name',
+                    email: '$studentInfo.email',
+                    percentage: { $round: ['$attendancePercentage', 1] }
+                }
+            }
+        ]);
+
+        res.json({
+            today: {
+                total: totalToday,
+                present: presentToday,
+                absent: absentToday,
+                percentage: totalToday > 0 ? Math.round((presentToday / totalToday) * 100) : 0
+            },
+            lowAttendance: lowAttendanceList
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     addUser,
     getUsers,
@@ -174,5 +256,6 @@ module.exports = {
     getSubjects,
     createTimetableEntry,
     getTimetable,
-    getDashboardStats
+    getDashboardStats,
+    getAttendanceAnalytics
 };

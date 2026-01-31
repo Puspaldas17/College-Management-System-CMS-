@@ -8,7 +8,8 @@ const {
     getSubjects,
     createTimetableEntry,
     getTimetable,
-    getDashboardStats
+    getDashboardStats,
+    getAttendanceAnalytics
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -27,5 +28,6 @@ router.post('/timetable', protect, admin, createTimetableEntry);
 router.get('/timetable', protect, admin, getTimetable);
 
 router.get('/stats', protect, admin, getDashboardStats);
+router.get('/attendance-analytics', protect, admin, getAttendanceAnalytics);
 
 module.exports = router;
