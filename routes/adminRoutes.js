@@ -7,7 +7,8 @@ const {
     createSubject,
     getSubjects,
     createTimetableEntry,
-    getTimetable
+    getTimetable,
+    getDashboardStats
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -24,5 +25,7 @@ router.get('/subjects', protect, admin, getSubjects);
 
 router.post('/timetable', protect, admin, createTimetableEntry);
 router.get('/timetable', protect, admin, getTimetable);
+
+router.get('/stats', protect, admin, getDashboardStats);
 
 module.exports = router;

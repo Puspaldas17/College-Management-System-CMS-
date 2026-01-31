@@ -12,6 +12,7 @@ const Sidebar = ({ role }) => {
         { path: '/admin/users', label: 'Users' },
         { path: '/admin/academic', label: 'Academic' },
         { path: '/admin/timetable', label: 'Timetable' },
+        { path: '/admin/classes', label: 'Classes' },
         { path: '/admin/notifications', label: 'Notifications' },
     ];
 
