@@ -45,6 +45,14 @@ const LandingPage = () => {
   );
 };
 
+/**
+ * Define the application's route structure and render the root Router element.
+ *
+ * Renders a BrowserRouter containing Routes for the landing page, login, admin section
+ * (dashboard, users, academic, timetable, notifications), teacher dashboard, and student dashboard.
+ *
+ * @returns {JSX.Element} The root React element containing the application's Router and route definitions.
+ */
 function App() {
   return (
     <Router>
